@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GAME XAMLUL </title>
+    <link rel="shortcut icon" href="./asset/emojis/png (13).png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- css -->
     <link rel="stylesheet" href="./asset/css/main.css">
@@ -23,6 +24,7 @@
         </div>
     </div>
     <section id="lobby">
+        <canvas id="myCanvas"></canvas>
         <h1>GAME XAMLUL ONLINE</h1>
         <ul class="list-menu">
             <li>
@@ -40,8 +42,21 @@
                     Chơi đơn
                 </div>
             </li>
+            <li>
+                <div id="setAvt" class="btn0">
+                    Chọn Avt
+                </div>
+            </li>
         </ul>
-        <div class="overplay">
+        <div class="overplay setAvtBox">
+            <h2>
+                Chọn avt của bạn:
+            </h2>
+            <div class="listAvt">
+                
+            </div>
+        </div>
+        <div class="overplay setMatrix">
             Bố cục ma trận: 
             <div class="flex">
                 <button id="reduce">-</button>
@@ -54,6 +69,13 @@
                 Chơi ngay!
             </div>
             <div id="closeOverplay">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+        </div>
+        <div class="overplay matchingBox">
+            Đang tìm trận đấu:
+            <span>0</span>
+            <div id="cancelMatching">
                 <i class="fa-solid fa-circle-xmark"></i>
             </div>
         </div>
@@ -70,6 +92,7 @@
         </section>
         <section class="right-side"></section>
     </main>
+    <script src="./asset/js/canvas.js"></script>
     <script src="./asset/js/main.js"></script>
 </body>
 </html>
