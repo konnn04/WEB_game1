@@ -323,7 +323,9 @@ function gameStartSingle(src,matrix) {
         timeBarLeft.style.width = `${(time1/time)*100}%`
         if (time1 < 0)  {
             document.querySelector("main .mid-side #noitce").innerText = "Mày thua rồi, NGU!!!"
-            document.querySelector("main .mid-side #noitce").style.display = "block"
+           setTimeout(()=>{
+                            location.reload()
+                        },5000) document.querySelector("main .mid-side #noitce").style.display = "block"
             for (let i=0;i<blockDOM.length;i++) {
                 blockDOM[i].onclick = null
                 setTimeout(()=>{
@@ -407,9 +409,7 @@ function gameStartSingle(src,matrix) {
                         blockDOM[i].innerHTML = `<div> <img src="./asset/emojis/question.PNG" alt="" srcset=""></div>`
                         blockDOM[i].classList.remove("wrong")
                         blockDOM[k].classList.remove("wrong")
-                        setTimeout(()=>{
-                            location.reload()
-                        },5000)
+                        
                     },500)
                 }
             }
