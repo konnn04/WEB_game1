@@ -58,9 +58,10 @@ body{
 }
 
 .loading-box .progress-bar div{
+    transition: all .3s linear;
     height: 10px;
     background-color: #fff;
-    width: 50%;
+    width: 0;
 }
 
 #lobby{
@@ -175,16 +176,71 @@ body{
     text-align: center;
 }
 
-#lobby .matchingBox i{
+#lobby i{
     cursor: pointer;
+    font-size: 1.4rem;
+}
+
+#lobby .listAvt{
+    width: 80%;
+    max-width: 600px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    align-items: start;
+    height: 60vh;
+    border: 2px solid #fff;
+    padding: 10px;
+    gap: 10px;
+    margin: 1rem;
+    overflow-y: auto;
+}
+
+#lobby .listAvt div{
+    box-sizing: border-box;
+    width: 23%;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+#lobby .listAvt div img{
+    width: 100%;height: 100%;
 }
 /*  */
 main{
     display: none;
     width: 100%;
     height: 100%;
-    grid-template-columns: .2fr 1fr .2fr;
+    grid-template-columns: .3fr 1fr .3fr;
 }
+
+main .left-side {
+    padding: 1rem;
+}
+
+main .left-side .avt{
+    width: 100%;
+    overflow: hidden;
+}
+
+main .left-side .avt img {
+    width: 100%;
+    height: 100%;
+}
+
+main .left-side .timeBarLeft{
+    width: 100%;
+    padding: 2px;
+    border: 2px solid #fff;
+}
+
+main .left-side .timeBarLeft>div {
+    width: 100%;
+    height: 8px;
+    background-color: #fff;
+    transition: all 1s linear;
+}
+
 
 main .mid-side{
     display: flex;
@@ -215,7 +271,8 @@ main #gameplay{
 
 
 #gameplay .block{
-    background-color: #fff;
+    opacity: 0;
+    transition: all .3s;
     cursor: pointer;
     position: relative;
     color: #131313;
@@ -233,7 +290,8 @@ main #gameplay{
 }
 
 #gameplay .block>div>img{
-    width: 100%;    
+    width: 100%;  
+    height: 100%;  
 }
 
 #gameplay .block.active{
@@ -259,5 +317,9 @@ main #gameplay{
     .mid-side{
         grid-row: 2;
         grid-column: 1/span 2;
+    }
+    main .left-side .avt{
+        height: 80%;
+        width: fit-content;
     }
 }

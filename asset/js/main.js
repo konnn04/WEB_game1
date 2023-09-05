@@ -1,5 +1,14 @@
 let music = true
 const username = "user" + Math.round(new Date().getTime()- 1690000000)
+let avtPos = 0
+let score=0
+let timeleft = 0
+
+if (localStorage.getItem("avt_game0")) {
+    avtPos=parseInt(localStorage.getItem("avt_game0"))
+}else{
+    avtPos = 0
+}
 
 function updateProgressLoanding(i) {
     let num = document.querySelector("#loading .loading-box .i")
@@ -60,6 +69,11 @@ window.onload = async ()=>{
             "type":"AUDIO"
         },
         {
+            "name":"sfxLose",
+            "src":"./asset/audio/SE_UI_MATCH_RESULT_LOSE.mp3",
+            "type":"AUDIO"
+        },
+        {
             "name":"sfxClick",
             "src":"./asset/audio/SE_VOLCHANGE_SE_UI.mp3",
             "type":"AUDIO"
@@ -89,6 +103,12 @@ window.onload = async ()=>{
         {
             "name":"sfxLetsgo",
             "src":"./asset/audio/letsgo.mp3",
+            "type":"AUDIO"
+        }
+        ,
+        {
+            "name":"sfxRecover",
+            "src":"./asset/audio/SE_UI_RECOVERY.mp3",
             "type":"AUDIO"
         }
     ]
@@ -143,14 +163,14 @@ function goLobby(src) {
         playSfx(src.sfxClick)
         let n = parseInt(matrixSingle.innerText)
         if (n>=20) return
-        matrixSingle.innerText=`${n+2}`
+        matrixSingle.innerText=`${n+1}`
     }
 
     reduceMatrix.onclick = ()=>{
         playSfx(src.sfxClick)
         let n = parseInt(matrixSingle.innerText)
-        if (n<=2) return
-        matrixSingle.innerText=`${n-2}`
+        if (n<=1) return
+        matrixSingle.innerText=`${n-1}`
     }
 
     singlePlay.onclick = async()=>{
@@ -173,6 +193,39 @@ function goLobby(src) {
         playSfx(src.sfxClick)
         alert("Đang phát triển!!!")
     }
+    //SetAvt
+    let setAvt = document.querySelector("#setAvt")
+    let listAvt = document.querySelector(".listAvt")
+    let h = ""
+    src.emoij.forEach((e,i)=>{
+        h+=`<div>
+            <img src="./asset/emojis/${e}" alt="" srcset="">
+        </div>`
+    })
+    listAvt.innerHTML = h
+
+    let avtFrame = document.querySelectorAll(".listAvt>div")
+
+    for (let i=0;i<avtFrame.length;i++) {
+        avtFrame[i].onclick = ()=>{
+            playSfx(src.sfxClick)
+            avtPos = i
+            localStorage.setItem("avt_game0",i)
+            document.querySelector(".setAvtBox").style.display = "none"
+        }
+    }
+
+    let closeSetAvt = document.querySelector("#closeSetAvt")
+    setAvt.onclick = ()=>{
+        playSfx(src.sfxClick)
+        document.querySelector(".setAvtBox").style.display = "flex"
+    }
+
+    closeSetAvt.onclick = ()=>{
+        playSfx(src.sfxClick)
+        document.querySelector(".setAvtBox").style.display = "none"
+    }
+
 }
 
 function playRepeat(audio,start,vol) {
@@ -205,6 +258,13 @@ function goPlaySingle(src,matrix) {
 }
 
 function gameStartSingle(src,matrix) {
+    let timeBarLeft = document.querySelector(".timeBarLeft div")
+    let scoreBoard = document.querySelector(".left-side .scoreBoard")
+    let time = matrix*matrix / 2 *5
+    let time1 = time
+    
+    let selfAvt = document.querySelector(".left-side .avt img")
+    selfAvt.src = "./asset/emojis/"+src.emoij[avtPos]
     // font
     let block = matrix*matrix
     let anwser = []
@@ -214,11 +274,11 @@ function gameStartSingle(src,matrix) {
         check.push(i);
         result.push(false)
     }
-    if (matrix == 20) {
-        let num = block/2
+
+    let num = Math.floor(block/2)
         for (let i=0;i<num;i++) {
             let rad 
-            for (let j=0;j<16;j++) {
+            for (let j=0;j<Math.ceil(matrix*matrix / 50)*2;j++) {
                 rad= Math.floor(Math.random()*block)
                 anwser[check[rad]] = i
                 let temp = check[block-1]
@@ -226,107 +286,77 @@ function gameStartSingle(src,matrix) {
                 check[rad]=temp
                 block--
             }
-        }
-    }else if (matrix == 18) {
-        let num = block/2
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<14;j++) {
-                rad= Math.floor(Math.random()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
-        }
-    }else if (matrix == 16) {
-        let num = block/2
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<12;j++) {
-                rad= Math.floor(Math.random()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
-        }
-    }else if (matrix == 14) {
-        let num = block/2
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<8;j++) {
-                rad= Math.floor(Math.random()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
-        }
-    }else if (matrix == 12) {
-        let num = block/2
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<6;j++) {
-                rad= Math.floor(Math.random()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
-        }
-    }else if (matrix >= 8 && matrix <=10) {
-        let num = block/2
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<4;j++) {
-                rad= Math.floor(Math.random()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
-        }
-    }else if (matrix <= 6) {
-        let num = block/2
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<2;j++) {
-                rad= Math.floor(Math.random()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
-        }
     }
+
+    if (block>0) {
+        anwser[check[0]] = -99
+        let temp = check[block-1]
+        check[block-1] = check[0]
+        check[0]=temp
+        block--
+    }
+
     let broad = document.querySelector("#gameplay")
     let text =""
-    let leftBlock = matrix*matrix / 2
+    let leftBlock = Math.ceil(matrix*matrix / 2)
     for (let i=0;i<matrix;i++) {
         text+="1fr "
     }
     
+    
+
     broad.style.gridTemplateColumns = text
     broad.style.gridTemplateRows = text
     anwser.forEach((e,i) => {
         broad.innerHTML+=
         `<div class="block">
-            
+            <div>
+            <img src="./asset/emojis/question.PNG" alt="" srcset="">
+            </div>
         </div>`
     });
-    let blockDOM = document.querySelectorAll("#gameplay .block")    
+    let blockDOM = document.querySelectorAll("#gameplay .block")   
+
+
+    let runTime = setInterval(()=>{
+        time1--
+        timeBarLeft.style.width = `${(time1/time)*100}%`
+        if (time1 < 0)  {
+            document.querySelector("main .mid-side #noitce").innerText = "Mày thua rồi, NGU!!!"
+            document.querySelector("main .mid-side #noitce").style.display = "block"
+            for (let i=0;i<blockDOM.length;i++) {
+                blockDOM[i].onclick = null
+                setTimeout(()=>{
+                    blockDOM[i].style.opacity = 0
+                },60*i)
+            }
+            playSfx(src.sfxLose)
+            clearInterval(runTime)
+        }
+    },1000)
+
     let currentClick = -1
     let cd = false
     for (let i=0;i<matrix*matrix;i++) {
+        setTimeout(()=>{
+            blockDOM[i].style.opacity = 1
+        },60*i)
         blockDOM[i].onclick = ()=>{
+            playSfx(src.sfxClick)
             if (currentClick == i || cd) return
+            if (anwser[i] == -99) {
+                
+                if (time1 + matrix*5 > time) {
+                    time1=time
+                }else{
+                    time1+=matrix*5
+                }
+                leftBlock--
+                blockDOM[i].innerHTML =``
+                blockDOM[i].onclick = null
+                playSfx(src.sfxRecover)
+                return
+            }
             blockDOM[i].innerHTML = 
             `<div>
                 <img src="./asset/emojis/${src.emoij[anwser[i]]}" alt="" srcset="">
@@ -344,19 +374,25 @@ function gameStartSingle(src,matrix) {
                     currentClick = -1
                     blockDOM[i].classList.add("correct")
                     blockDOM[k].classList.add("correct")
-                    
+                    //Tăng điểm
+                    score += time1*100 + ((matrix*matrix/2)-leftBlock)*10
+                    scoreBoard.innerText = "Điểm: " +score
                     leftBlock--;
                     setTimeout(()=>{
                         blockDOM[k].style.opacity = "0"
                         blockDOM[i].style.opacity = "0"
                         blockDOM[k].onclick = null
                         blockDOM[i].onclick = null
-                        blockDOM[k].innerHTML = ""
-                        blockDOM[i].innerHTML = ""
+                        blockDOM[k].innerHTML = ``
+                        blockDOM[i].innerHTML =``
                         cd=false
                         if (leftBlock <=0) {
                             document.querySelector("main .mid-side #noitce").style.display = "block"
                             playSfx(src.sfxClear)
+                            clearInterval(runTime)
+                            setTimeout(()=>{
+                                location.reload()
+                            },5000)
                         }
                     },500)
                 }else{
@@ -366,11 +402,14 @@ function gameStartSingle(src,matrix) {
                     blockDOM[i].classList.add("wrong")
                     blockDOM[k].classList.add("wrong")
                     setTimeout(()=>{
-                        blockDOM[k].innerHTML = ""
+                        blockDOM[k].innerHTML = `<div> <img src="./asset/emojis/question.PNG" alt="" srcset=""></div>`
                         cd=false
-                        blockDOM[i].innerHTML = ""
+                        blockDOM[i].innerHTML = `<div> <img src="./asset/emojis/question.PNG" alt="" srcset=""></div>`
                         blockDOM[i].classList.remove("wrong")
                         blockDOM[k].classList.remove("wrong")
+                        setTimeout(()=>{
+                            location.reload()
+                        },5000)
                     },500)
                 }
             }
