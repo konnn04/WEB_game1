@@ -323,9 +323,11 @@ function gameStartSingle(src,matrix) {
         timeBarLeft.style.width = `${(time1/time)*100}%`
         if (time1 < 0)  {
             document.querySelector("main .mid-side #noitce").innerText = "Mày thua rồi, NGU!!!"
+
            setTimeout(()=>{
                             location.reload()
-                        },5000) document.querySelector("main .mid-side #noitce").style.display = "block"
+                        },5000)
+ document.querySelector("main .mid-side #noitce").style.display = "block"
             for (let i=0;i<blockDOM.length;i++) {
                 blockDOM[i].onclick = null
                 setTimeout(()=>{
