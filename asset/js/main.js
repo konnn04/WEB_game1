@@ -196,7 +196,7 @@ function gameStartSingle(src,matrix) {
     }
     let broad = document.querySelector("#gameplay")
     let text =""
-    let leftBlock = matrix
+    let leftBlock = matrix*matrix / 2
     for (let i=0;i<matrix;i++) {
         text+="1fr "
     }
