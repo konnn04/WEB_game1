@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAME XAMLUL </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- css -->
+    <link rel="stylesheet" href="./asset/css/main.css">
+</head>
+<body>
+    <div id="musicBtn">
+        <i class="fa-solid fa-volume-high"></i>
+    </div>
+    <div id="loading">
+        <h1>GAME XAMLUL ONLINE</h1>
+        <div class="loading-box">
+            <span>Đang tải tài nguyên...</span>
+            <span class="i">0%</span>
+            <div class="progress-bar">
+                <div></div>
+            </div>
+        </div>
+    </div>
+    <section id="lobby">
+        <h1>GAME XAMLUL ONLINE</h1>
+        <ul class="list-menu">
+            <li>
+                <div id="matchPlay" class="btn0">
+                    Tìm trận nhanh
+                </div>
+            </li>
+            <li>
+                <div id="roomPlay" class="btn0">
+                    Tạo phòng
+                </div>
+            </li>
+            <li>
+                <div id="singlePlayPrepare" class="btn0">
+                    Chơi đơn
+                </div>
+            </li>
+        </ul>
+        <div class="overplay">
+            Bố cục ma trận: 
+            <div class="flex">
+                <button id="reduce">-</button>
+                <div id="matrixSingle">
+                    2
+                </div>
+                <button id="increase">+</button>
+            </div>
+            <div id="singlePlay" class="btn0">
+                Chơi ngay!
+            </div>
+            <div id="closeOverplay">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+        </div>
+    </section>
+    <main>
+        <section class="left-side"></section>
+        <section class="mid-side">
+            <div id="gameplay">
+                <!--  -->
+            </div>
+            <div id="noitce">
+                You Win!!!
+            </div>
+        </section>
+        <section class="right-side"></section>
+    </main>
+    <script src="./asset/js/main.js"></script>
+</body>
+</html>

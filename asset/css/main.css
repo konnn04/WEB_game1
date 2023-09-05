@@ -1,0 +1,205 @@
+*{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: aliceblue;
+}
+
+body{
+    background-color: #131313;
+    position: relative;
+    height: 100vh;
+    user-select: none;
+}
+
+#musicBtn{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 6;
+}
+
+#closeOverplay{
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+/* sence1 */
+#loading{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#loading > .loading-box{
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right:1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 2;
+    gap: 10px;
+}
+
+.loading-box span:nth-child(2) {
+    text-align: right;
+}
+
+.loading-box .progress-bar{
+    grid-column: 1/span 2;
+    padding: 2px;
+    border: 1px solid #fff;
+    box-sizing: border-box;
+}
+
+.loading-box .progress-bar div{
+    height: 10px;
+    background-color: #fff;
+    width: 50%;
+}
+
+#lobby{
+    display: none;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+}
+
+#lobby .overplay{
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    backdrop-filter: brightness(.1);
+    z-index: 5;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.overplay .flex{
+    display: flex;
+    gap: 1rem;
+    margin: .5rem;
+    font-size: 1.5rem;
+}
+
+.overplay button{
+    border: 2px solid #fff;
+    aspect-ratio: 1;
+    height: 2rem;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.overplay button:hover{
+    background-color: #fff;
+    color: #131313;
+}
+
+#lobby h1{
+    text-align: center;
+}
+
+#lobby .list-menu{
+    list-style: none;
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 0;
+}
+
+.btn0{
+    text-align: center;
+    border: 2px solid #fff;
+    padding: .5rem;
+    width: 200px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+
+.btn0:hover{
+    background-color: #fff;
+    color: #131313;
+}
+
+/*  */
+main{
+    display: none;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: .2fr 1fr .2fr;
+}
+
+main .mid-side{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+main .mid-side #noitce{
+    display: none;
+    position: absolute;
+    font-size: 2rem;
+    text-shadow: 2px 2px 2px green;
+}
+
+main #gameplay{
+    margin: auto 1rem;
+    aspect-ratio: 1;
+    width: 100%;
+    max-width: 85vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr ;
+    grid-template-rows: 1fr 1fr 1fr 1fr ;
+    gap: 2px;
+}
+
+
+#gameplay .block{
+    background-color: #fff;
+    cursor: pointer;
+    position: relative;
+    color: #131313;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#gameplay .block.active{
+    background-color: rgb(245, 131, 0);
+}
+
+#gameplay .block.correct{
+    background-color: rgb(4, 245, 0);
+}
+
+#gameplay .block.wrong{
+    background-color: rgb(245, 0, 0);
+}
+
+@media screen and (max-width:600px) {
+    main{
+        display: none;
+        width: 100%;
+        height: 100%;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 20vh 1fr;
+    }
+    .mid-side{
+        grid-row: 2;
+        grid-column: 1/span 2;
+    }
+}
