@@ -260,7 +260,7 @@ function goPlaySingle(src,matrix) {
 function gameStartSingle(src,matrix) {
     let timeBarLeft = document.querySelector(".timeBarLeft div")
     let scoreBoard = document.querySelector(".left-side .scoreBoard")
-    let time = matrix*matrix / 2 *5
+    let time = ((matrix*matrix) / 2) *5
     let time1 = time
     
     let selfAvt = document.querySelector(".left-side .avt img")
@@ -378,6 +378,8 @@ function gameStartSingle(src,matrix) {
                     currentClick = -1
                     blockDOM[i].classList.add("correct")
                     blockDOM[k].classList.add("correct")
+                    //Tang thoi gian
+                    time1=(time1 + matrix >= time)?time:time1+matrix;
                     //Tăng điểm
                     score += time1*100 + ((matrix*matrix/2)-leftBlock)*10
                     scoreBoard.innerText = "Điểm: " +score
