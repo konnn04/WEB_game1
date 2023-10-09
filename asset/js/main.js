@@ -3,6 +3,10 @@ const username = "user" + Math.round(new Date().getTime()- 1690000000)
 let avtPos = 0
 let score=0
 let timeleft = 0
+let ratioScore = 1
+
+let seeding = 0
+let z_rand = -1
 
 if (localStorage.getItem("avt_game0")) {
     avtPos=parseInt(localStorage.getItem("avt_game0"))
@@ -191,7 +195,7 @@ function goLobby(src) {
     let roomPlay = document.querySelector("#roomPlay")
     roomPlay.onclick = ()=>{
         playSfx(src.sfxClick)
-        alert("Đang phát triển!!!")
+        alert("Đang phát triển!!!")//
     }
     //SetAvt
     let setAvt = document.querySelector("#setAvt")
@@ -255,6 +259,7 @@ function playSfx(audio) {
 function goPlaySingle(src,matrix) {
     playRepeat(src.bgPlay,0,.2)
     gameStartSingle(src,matrix)
+    document.querySelector(".right-side").style.display = "none"
 }
 
 function gameStartSingle(src,matrix) {
@@ -274,8 +279,8 @@ function gameStartSingle(src,matrix) {
         check.push(i);
         result.push(false)
     }
-
-    let num = Math.floor(block/2)
+    let guild = (matrix % 2 ==0 && matrix>5)?Math.floor(matrix/2 - 2):0;
+    let num = Math.floor(block/2) - guild
         for (let i=0;i<num;i++) {
             let rad 
             for (let j=0;j<Math.ceil(matrix*matrix / 50)*2;j++) {
@@ -288,7 +293,8 @@ function gameStartSingle(src,matrix) {
             }
     }
 
-    if (block>0) {
+    let leftBlock = num + block
+    while (block>0) {
         anwser[check[0]] = -99
         let temp = check[block-1]
         check[block-1] = check[0]
@@ -298,7 +304,7 @@ function gameStartSingle(src,matrix) {
 
     let broad = document.querySelector("#gameplay")
     let text =""
-    let leftBlock = Math.ceil(matrix*matrix / 2)
+    
     for (let i=0;i<matrix;i++) {
         text+="1fr "
     }
@@ -356,8 +362,15 @@ function gameStartSingle(src,matrix) {
                     time1+=matrix*5
                 }
                 leftBlock--
-                blockDOM[i].innerHTML =``
+                blockDOM[i].innerHTML =`
+                <div>
+                    <img src="./asset/emojis/bunostime.png" alt="" srcset="">
+                </div>
+                `
                 blockDOM[i].onclick = null
+                setTimeout(()=>{
+                    blockDOM[i].innerHTML =''
+                },500)
                 playSfx(src.sfxRecover)
                 return
             }
@@ -379,7 +392,10 @@ function gameStartSingle(src,matrix) {
                     blockDOM[i].classList.add("correct")
                     blockDOM[k].classList.add("correct")
                     //Tang thoi gian
-                    time1=(time1 + matrix >= time)?time:time1+matrix;
+                    if (matrix >=5) {
+                        time1=(time1+matrix-4 > time)?time:time1+matrix-4;
+                    }
+                    
                     //Tăng điểm
                     score += time1*100 + ((matrix*matrix/2)-leftBlock)*10
                     scoreBoard.innerText = "Điểm: " +score
@@ -392,14 +408,6 @@ function gameStartSingle(src,matrix) {
                         blockDOM[k].innerHTML = ``
                         blockDOM[i].innerHTML =``
                         cd=false
-                        if (leftBlock <=0) {
-                            document.querySelector("main .mid-side #noitce").style.display = "block"
-                            playSfx(src.sfxClear)
-                            clearInterval(runTime)
-                            setTimeout(()=>{
-                                location.reload()
-                            },5000)
-                        }
                     },500)
                 }else{
                     let k = currentClick
@@ -416,6 +424,14 @@ function gameStartSingle(src,matrix) {
                         
                     },500)
                 }
+            }
+            if (leftBlock <=0) {
+                document.querySelector("main .mid-side #noitce").style.display = "block"
+                playSfx(src.sfxClear)
+                clearInterval(runTime)
+                setTimeout(()=>{
+                    location.reload()
+                },5000)
             }
         }
     }
@@ -458,7 +474,10 @@ async function startMatching(src) {
             await fetch(src.API+"/"+idRoom, {
                 method: 'PUT', // or PATCH
                 headers: {'content-type':'application/json'},
-                body: JSON.stringify({"player":player})
+                body: JSON.stringify({
+                    "player":player,
+                    "avt2":"./" + src.emoij[avtPos]
+                })
             }).then(res => {
                 if (res.ok) {
                     return res.json();
@@ -467,6 +486,7 @@ async function startMatching(src) {
             }).then(task => {
                 startMatchPrepareClient(src,e.id)
                 time.innerText ="Bắt cặp thành công!"
+                seeding = task.seeding
                 
             }).catch(error => {
                 alert("lỗi")
@@ -480,14 +500,23 @@ async function startMatching(src) {
     console.log(check)
     if (check) return   
     //Không tìm thấy phòng thì tự tạo phòng      
-    console.log("Tạo phòng!")
+    // console.log("Tạo phòng!")
+    //Tạo seedding
+    seeding = new Date().getTime()
     await fetch(src.API, {
         method: 'POST',
         headers: {'content-type':'application/json'},
         // Send your data in the request body as JSON
         body: JSON.stringify({
             "player":[username],
-            "diff":4
+            "diff":4,
+            "seeding":seeding,
+            "avt1":"./" + src.emoij[avtPos],
+            "avt2":"",
+            "score1":0,
+            "score2":0,
+            "time1":0,
+            "time2":0
         })
       }).then(res => {
         if (res.ok) {
@@ -496,8 +525,8 @@ async function startMatching(src) {
         // handle error
       }).then(task => {
         idRoom=task.id
+        console.log(idRoom)
       }).catch(error => {
-        console.log(error)
         alert("Lỗi đường truyền")
       })
 
@@ -522,10 +551,11 @@ async function startMatching(src) {
                     return res.json();
                 }
                 // handle error
-            }).then(tasks => {
+            }).then(async tasks => {
                 if (tasks.player.length!=1) {
+                    seeding = tasks.seeding
                     clearInterval(run)
-                    startMatchPrepareHost(src,idRoom)
+                    await startMatchPrepareHost(src,idRoom)
                     time.innerText ="Bắt cặp thành công!"
                 }
             }).catch(error => {
@@ -579,10 +609,271 @@ async function startMatching(src) {
 }
 
 // 
-function startMatchPrepareHost(src,id) {
+async function startMatchPrepareHost(src,id) {
     playSfx(src.sfxMatched)
+    src.bgMatching.pause()
+    
+    setTimeout(async()=>{
+        document.querySelector("#lobby").style.display = "none"
+        document.querySelector("main").style.display = "grid"
+        await gameStartMulti(src,4,id,true)
+        playRepeat(src.bgPlay,0,.2)
+
+    },3000)
 }
 
-function startMatchPrepareClient(src,id) {
-    playSfx(src.sfxMatched)
+async function startMatchPrepareClient(src,id) {
+    playSfx(src.sfxMatched)    
+    src.bgMatching.pause()    
+
+    setTimeout(async ()=>{
+        document.querySelector("#lobby").style.display = "none"
+        document.querySelector("main").style.display = "grid"
+        await gameStartMulti(src,4,id,false)
+        playRepeat(src.bgPlay,0,.2)
+
+    },3000)
+
+}
+
+function ramdonSeft() {
+    if (z_rand == -1) z_rand = seeding
+    z_rand = ( z_rand% 10000) / 10000
+    let z = z_rand;
+    z_rand= (seeding + 9999999999) * z_rand
+    return z
+}
+
+// 
+async function gameStartMulti(src,matrix,id,host) {
+    // let timeBarLeft = document.querySelector(".timeBarLeft div")
+    let data = await downdate(src,id)
+    let scoreBoard = document.querySelectorAll(".scoreBoard")
+    let time = 0
+    
+    //Tạo bộ đếm
+    let gameWhile = setInterval(async ()=>{             
+        time++;
+        if (time % 4 == 0) {
+            data = await downdate(src,id)
+            let scoreOp = (host)?data.score2:data.score1
+            scoreBoard[1].innerHTML = "Điểm: <span>" +scoreOp+"</span>";
+            let jsonupdate = (host)?{
+                "score1":score
+            }:{
+                "score2":score
+            }
+            setTimeout(()=>{
+                update(src,id,jsonupdate)
+            },2000)
+        }
+        document.querySelector(".timeRemain").innerHTML = "Thời gian: <span>"+time+"</span>"
+    },1000)
+    
+    document.querySelector(".left-side .avt img").src = "./asset/emojis/"+src.emoij[avtPos]
+    let avtOp = (host)?data.avt2:data.avt1;
+    document.querySelector(".right-side .avt_op img").src = "./asset/emojis/"+avtOp
+    // font
+    let block = matrix*matrix
+    let anwser = []
+    let check = []
+    let result = []
+    for(let i=0;i<block;i++) {
+        check.push(i);
+        result.push(false)
+    }
+    let guild = (matrix % 2 ==0 && matrix>5)?Math.floor(matrix/2 - 2):0;
+    let num = Math.floor(block/2) - guild
+        for (let i=0;i<num;i++) {
+            let rad 
+            for (let j=0;j<Math.ceil(matrix*matrix / 50)*2;j++) {
+                rad= Math.floor(ramdonSeft()*block)
+                anwser[check[rad]] = i
+                let temp = check[block-1]
+                check[block-1] = check[rad]
+                check[rad]=temp
+                block--
+            }
+    }
+
+    let leftBlock = num + block
+    while (block>0) {
+        anwser[check[0]] = -99
+        let temp = check[block-1]
+        check[block-1] = check[0]
+        check[0]=temp
+        block--
+    }
+
+    let broad = document.querySelector("#gameplay")
+    let text =""
+    
+    for (let i=0;i<matrix;i++) {
+        text+="1fr "
+    }
+    
+    
+
+    broad.style.gridTemplateColumns = text
+    broad.style.gridTemplateRows = text
+    anwser.forEach((e,i) => {
+        broad.innerHTML+=
+        `<div class="block">
+            <div>
+            <img src="./asset/emojis/question.PNG" alt="" srcset="">
+            </div>
+        </div>`
+    });
+    let blockDOM = document.querySelectorAll("#gameplay .block")   
+    let currentClick = -1
+    let cd = false
+    for (let i=0;i<matrix*matrix;i++) {
+        setTimeout(()=>{
+            blockDOM[i].style.opacity = 1
+        },60*i)
+        blockDOM[i].onclick = ()=>{
+            playSfx(src.sfxClick)
+            if (currentClick == i || cd) return
+            if (anwser[i] == -99) {
+                
+                buffTime = 10
+                
+                runBuff()
+
+
+                leftBlock--
+                blockDOM[i].innerHTML =`
+                <div>
+                    <img src="./asset/emojis/x2.png" alt="" srcset="">
+                </div>
+                `
+                blockDOM[i].onclick = null
+                setTimeout(()=>{
+                    blockDOM[i].innerHTML =''
+                },500)
+                playSfx(src.sfxRecover)
+                return
+            }
+            blockDOM[i].innerHTML = 
+            `<div>
+                <img src="./asset/emojis/${src.emoij[anwser[i]]}" alt="" srcset="">
+            </div>`
+            if (currentClick<0) {
+                playSfx(src.sfxClick)
+                currentClick = i
+                blockDOM[i].classList.add("active")
+            }else{
+                blockDOM[currentClick].classList.remove("active")
+                cd=true
+                if (anwser[currentClick] == anwser[i]) {
+                    playSfx(src.sfxCorrect)
+                    let k = currentClick
+                    currentClick = -1
+                    blockDOM[i].classList.add("correct")
+                    blockDOM[k].classList.add("correct")
+                    //Tang thoi gian
+                    // if (matrix >=5) {
+                    //     time1=(time1+matrix-4 > time)?time:time1+matrix-4;
+                    // }
+                    
+                    //Tăng điểm
+                    score += (leftBlock*10 + 1000)*ratioScore
+                    scoreBoard[0].innerHTML = "Điểm: <span>" +score+"</span>"
+                    leftBlock--;
+                    setTimeout(()=>{
+                        blockDOM[k].style.opacity = "0"
+                        blockDOM[i].style.opacity = "0"
+                        blockDOM[k].onclick = null
+                        blockDOM[i].onclick = null
+                        blockDOM[k].innerHTML = ``
+                        blockDOM[i].innerHTML =``
+                        cd=false
+                    },500)
+                }else{
+                    let k = currentClick
+                    currentClick = -1
+                    playSfx(src.sfxWrong)
+                    blockDOM[i].classList.add("wrong")
+                    blockDOM[k].classList.add("wrong")
+                    setTimeout(()=>{
+                        blockDOM[k].innerHTML = `<div> <img src="./asset/emojis/question.PNG" alt="" srcset=""></div>`
+                        cd=false
+                        blockDOM[i].innerHTML = `<div> <img src="./asset/emojis/question.PNG" alt="" srcset=""></div>`
+                        blockDOM[i].classList.remove("wrong")
+                        blockDOM[k].classList.remove("wrong")
+                        
+                    },500)
+                }
+            }
+            if (leftBlock <=0) {
+                document.querySelector("main .mid-side #noitce").style.display = "block"
+                playSfx(src.sfxClear)
+                clearInterval(gameWhile)
+                setTimeout(()=>{
+                    location.reload()
+                },5000)
+            }
+        }
+    }
+}
+
+async function update(src,id,json) {
+    await fetch(src.API+"/"+id, {
+        method: 'PUT',
+        headers: {'content-type':'application/json'},
+        // Send your data in the request body as JSON
+        body: JSON.stringify(json)
+    }).then(res => {
+        if (res.ok) {
+            return res.json();
+        }
+        // handle error
+    }).then(task => {
+        idRoom=task.id
+    }).catch(error => {
+        console.log(error)
+        alert("Lỗi đường truyền")
+    })
+}
+
+async function downdate(src,id) {  
+    let data
+    console.log(src.API+"/"+id)
+    await fetch(src.API+"/"+id, {
+        method: 'GET',
+        headers: {'content-type':'application/json'},
+    }).then(res => {
+        if (res.ok) {
+            return res.json();
+        }
+        // handle error
+    }).then(tasks => {
+        data = tasks
+    }).catch(error => {
+        console.log(error)
+        alert("Lỗi đường truyền")
+    })
+    return data
+}
+
+function runBuff() {
+    ratioScore *= 2
+    let b = document.querySelectorAll(".buff")
+    let timer = 10
+
+    b[0].append(`
+        <div>
+            <img src="./asset/emojis/x2.png">
+            <span>${timer}</span>
+        </div>
+    `)
+    let buff = setInterval(()=>{
+        timer--
+        document.querySelector(".buff span").innerText = timer
+        if (timer < 0) {
+            b[0].innerHTML = ""
+            ratioScore /=2
+            clearInterval(buff)
+        }
+    },1000)
 }
