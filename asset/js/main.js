@@ -617,7 +617,7 @@ async function startMatchPrepareHost(src,id) {
     setTimeout(async()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,2,id,true)
+        await gameStartMulti(src,5,id,true)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
@@ -630,7 +630,7 @@ async function startMatchPrepareClient(src,id) {
     setTimeout(async ()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,2,id,false)
+        await gameStartMulti(src,5,id,false)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
