@@ -767,6 +767,7 @@ async function startMatching(src) {
 async function startMatchPrepareHost(src,id,matrix) {
     playSfx(src.sfxMatched)
     src.bgMatching.pause()
+    src.bgMain.pause()
     setTimeout(async()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
@@ -779,6 +780,7 @@ async function startMatchPrepareHost(src,id,matrix) {
 async function startMatchPrepareClient(src,id,matrix) {
     playSfx(src.sfxMatched)    
     src.bgMatching.pause()    
+    src.bgMain.pause()
 
     setTimeout(async ()=>{
         document.querySelector("#lobby").style.display = "none"
