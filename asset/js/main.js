@@ -40,6 +40,16 @@ async function loadAsset(res,list) {
 }
 
 window.onload = async ()=>{
+
+    let focusScreen = false
+
+    document.body.onmouseover = ()=>{
+        if (!focusScreen) {
+            focusScreen=true
+            src.bgMain.play()
+        }
+    }
+
     updateProgressLoanding(0)
     let src = {
         "API":"https://64f5ca4d2b07270f705db559.mockapi.io/game",
