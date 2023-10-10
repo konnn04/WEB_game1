@@ -861,12 +861,10 @@ function runBuff() {
     let b = document.querySelectorAll(".buff")
     let timer = 10
 
-    b[0].append(`
-        <div>
-            <img src="./asset/emojis/x2.png">
-            <span>${timer}</span>
-        </div>
-    `)
+    b[0].innerHTML = `<div>
+    <img src="./asset/emojis/x2.png">
+    <span>${timer}</span>
+    </div>`
     let buff = setInterval(()=>{
         timer--
         document.querySelector(".buff span").innerText = timer
