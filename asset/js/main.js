@@ -49,7 +49,7 @@ window.onload = async ()=>{
     let listAsset = [
         {
             "name":"bgMatching",
-            "src":"./asset/audio/BGM_RANK_MATCHING.mp3",
+            "src":"./asset/audio/BGM_MUTI_MATCHING.mp3",
             "type":"AUDIO"
         },
         {
@@ -59,7 +59,7 @@ window.onload = async ()=>{
         },
         {
             "name":"bgMain",
-            "src":"./asset/audio/BGM_RANK_TOP.mp3",
+            "src":"./asset/audio/BGM_MULTI_LIVE.mp3",
             "type":"AUDIO"
         },
         {
@@ -142,7 +142,7 @@ function goLobby(src) {
     }  
     setTimeout(()=>{
         if (localStorage.getItem("music_game1")=="off") musicBtn.onclick()
-        playRepeat(src.bgMain,1.25,.4)
+        playRepeat(src.bgMain,0,.4)
         // playRepeat(src.music1,0)
         document.querySelector("#loading").style.display = "none"
         document.querySelector("#lobby").style.display = "flex"
@@ -444,7 +444,7 @@ async function startMatching(src) {
     let cancelMatching = overplayMatching.querySelector("#cancelMatching")   
     src.bgMain.pause()
     overplayMatching.style.display = "flex"
-    playRepeat(src.bgMatching,3.22,.4)
+    playRepeat(src.bgMatching,7.76,.4)
     let data
     let idRoom = -1
     time.innerText ="Đang chuẩn bị..."
@@ -616,7 +616,7 @@ async function startMatchPrepareHost(src,id) {
     setTimeout(async()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,4,id,true)
+        await gameStartMulti(src,5,id,true)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
@@ -629,7 +629,7 @@ async function startMatchPrepareClient(src,id) {
     setTimeout(async ()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,4,id,false)
+        await gameStartMulti(src,5,id,false)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
