@@ -883,7 +883,10 @@ async function gameStartMulti(src,matrix,id,host) {
         check.push(i);
         result.push(false)
     }
-    let guild = (matrix % 2 ==0 && matrix>5)?Math.floor(matrix/2 - 2):0;
+    let guild = 0
+    if (matrix>5) {
+        guild = Math.floor(matrix/2 - 2);
+    }
 
     let num = Math.floor(block/2) - guild
         for (let i=0;i<num;i++) {
