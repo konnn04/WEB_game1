@@ -312,7 +312,7 @@ function goLobby(src) {
 
     document.querySelector("#join_room").onclick = async ()=>{
         let idroom = parseInt(document.querySelector("#id_join_room").value)
-        console.log(idroom)
+        console.log("Mã phòng: " + idroom)
         await fetch(src.API+"/"+idroom, {
             method: 'GET',
             headers: {'content-type':'application/json'},
@@ -441,18 +441,35 @@ function gameStartSingle(src,matrix) {
         check.push(i);
         result.push(false)
     }
-    let guild = (matrix % 2 ==0 && matrix>5)?Math.floor(matrix/2 - 2):0;
-    let num = Math.floor(block/2) - guild
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<Math.ceil(matrix*matrix / 50)*2;j++) {
-                rad= Math.floor(Math.random()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
+
+    let guild = 0
+    if (matrix>5) {
+        guild = Math.floor(matrix/2 - 2);
+    }
+
+    let num = Math.floor(block/2) - guild //số cặp được tạo
+    let duoPic = Math.ceil(matrix*matrix / 50)//số cặp cho phép trùng lặp
+    let indexPic = 0
+    for (let i=0;i<num;i++) {
+        let rad 
+        //cặp 1
+        rad= Math.floor(ramdonSeft()*block)
+        anwser[check[rad]] = indexPic
+        let temp = check[block-1]
+        check[block-1] = check[rad]
+        check[rad]=temp
+        block--
+        //cặp 2
+        rad= Math.floor(ramdonSeft()*block)
+        anwser[check[rad]] = indexPic
+        temp = check[block-1]
+        check[block-1] = check[rad]
+        check[rad]=temp
+        block--
+        //tăng i
+        if ((i!=0) && (i % duoPic == 0)) {
+            indexPic++;
+        }
     }
 
     let leftBlock = num + block
@@ -604,7 +621,9 @@ async function startMatching(src) {
     let overplayMatching = document.querySelector(".matchingBox") 
     let time = overplayMatching.querySelector("span")
     let cancelMatching = overplayMatching.querySelector("#cancelMatching")   
-    src.bgMain.pause()
+    setTimeout(()=>{
+        src.bgMain.pause()
+    },100)
     overplayMatching.style.display = "flex"
     playRepeat(src.bgMatching,7.76,.4)
     let data
@@ -660,7 +679,6 @@ async function startMatching(src) {
         //Thoat
                
     }
-    console.log(check)
     if (check) return   
     //Không tìm thấy phòng thì tự tạo phòng      
     // console.log("Tạo phòng!")
@@ -690,7 +708,7 @@ async function startMatching(src) {
         // handle error
       }).then(task => {
         idRoom=task.id
-        console.log(idRoom)
+        console.log("Mã phòng: " + idRoom)
       }).catch(error => {
         alert("Lỗi đường truyền")
       })
@@ -822,7 +840,21 @@ async function gameStartMulti(src,matrix,id,host) {
     let gameWhile = setInterval(async ()=>{ 
         
         let idOP = (host)?2:1;
-
+        let delayTime = 0
+        if (host) {
+            delayTime = Math.abs(new Date().getTime() - data.realtime2) 
+        }else{
+            delayTime = Math.abs(new Date().getTime() - data.realtime1) 
+        }
+        delayTime = (delayTime == NaN)?0:delayTime;
+        console.log(delayTime)
+        if (delayTime > 12000) {
+            document.querySelector(".right-side .avt_op img").style.filter = "brightness(.2)"
+            // document.querySelector(".right-side .avt_op").innerText = "Đã ngắt mạng"
+        }else{
+            document.querySelector(".right-side .avt_op img").style.filter = "brightness(1)"
+            // document.querySelector(".right-side .avt_op").innerText = ""
+        }
         if (data.end == idOP) {
                 document.querySelector("main .mid-side #noitce").style.display = "block"
                 document.querySelector("main .mid-side #noitce").innerHTML = `
@@ -859,10 +891,12 @@ async function gameStartMulti(src,matrix,id,host) {
             scoreBoard[1].innerHTML = "Điểm: <span>" +scoreOp+"</span>";
             let jsonupdate = (host)?{
                 "score1":score,
-                "time1":time
+                "time1":time,
+                "realtime1":new Date().getTime()
             }:{
                 "score2":score,
-                "time2":time
+                "time2":time,
+                "realtime2":new Date().getTime()
             }
             setTimeout(()=>{
                 update(src,id,jsonupdate)
@@ -888,19 +922,30 @@ async function gameStartMulti(src,matrix,id,host) {
         guild = Math.floor(matrix/2 - 2);
     }
 
-    let num = Math.floor(block/2) - guild
-        for (let i=0;i<num;i++) {
-            let rad 
-            for (let j=0;j<Math.ceil(matrix*matrix / 50)*2;j++) {
-                rad= Math.floor(ramdonSeft()*block)
-                anwser[check[rad]] = i
-                let temp = check[block-1]
-                check[block-1] = check[rad]
-                check[rad]=temp
-                block--
-            }
+    let num = Math.floor(block/2) - guild //số cặp được tạo
+    let duoPic = Math.ceil(matrix*matrix / 50)//số cặp cho phép trùng lặp
+    let indexPic = 0
+    for (let i=0;i<num;i++) {
+        let rad 
+        //cặp 1
+        rad= Math.floor(ramdonSeft()*block)
+        anwser[check[rad]] = indexPic
+        let temp = check[block-1]
+        check[block-1] = check[rad]
+        check[rad]=temp
+        block--
+        //cặp 2
+        rad= Math.floor(ramdonSeft()*block)
+        anwser[check[rad]] = indexPic
+        temp = check[block-1]
+        check[block-1] = check[rad]
+        check[rad]=temp
+        block--
+        //tăng i
+        if ((i!=0) && (i % duoPic == 0)) {
+            indexPic++;
+        }
     }
-
     let leftBlock = num + block
     while (block>0) {
         anwser[check[0]] = -99
@@ -1063,7 +1108,7 @@ async function update(src,id,json) {
 
 async function downdate(src,id) {  
     let data
-    console.log(src.API+"/"+id)
+    
     await fetch(src.API+"/"+id, {
         method: 'GET',
         headers: {'content-type':'application/json'},
