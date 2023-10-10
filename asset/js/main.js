@@ -43,12 +43,12 @@ window.onload = async ()=>{
 
     let focusScreen = false
 
-    document.body.onmouseover = ()=>{
+    document.addEventListener("click",()=>{
         if (!focusScreen) {
             focusScreen=true
             src.bgMain.play()
         }
-    }
+    })
 
     updateProgressLoanding(0)
     let src = {
