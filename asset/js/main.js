@@ -516,7 +516,8 @@ async function startMatching(src) {
             "score1":0,
             "score2":0,
             "time1":0,
-            "time2":0
+            "time2":0,
+            "end":0
         })
       }).then(res => {
         if (res.ok) {
@@ -616,7 +617,7 @@ async function startMatchPrepareHost(src,id) {
     setTimeout(async()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,5,id,true)
+        await gameStartMulti(src,2,id,true)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
@@ -629,7 +630,7 @@ async function startMatchPrepareClient(src,id) {
     setTimeout(async ()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,5,id,false)
+        await gameStartMulti(src,2,id,false)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
@@ -646,22 +647,57 @@ function ramdonSeft() {
 
 // 
 async function gameStartMulti(src,matrix,id,host) {
-    // let timeBarLeft = document.querySelector(".timeBarLeft div")
+    let timeBarLeft = document.querySelector(".timeBarLeft")
+    timeBarLeft.style.display = "none"
     let data = await downdate(src,id)
     let scoreBoard = document.querySelectorAll(".scoreBoard")
     let time = 0
     
     //Tạo bộ đếm
-    let gameWhile = setInterval(async ()=>{             
+    let gameWhile = setInterval(async ()=>{ 
+        
+        let idOP = (host)?2:1;
+
+        if (data.end == idOP) {
+                document.querySelector("main .mid-side #noitce").style.display = "block"
+                document.querySelector("main .mid-side #noitce").innerHTML = `
+                    <h1>THUA CUỘC!!!</h1>
+                    <h2>Đối thủ đã hoàn thành trước bạn!</h2>
+                    <h3>Thời gian của bạn: <span>${time}s</span></h3>
+                    <h3>Điểm của bạn: <span>${score}</span></h3>
+                    <hr>
+                    <h4>Đối thủ: </h4>
+                    <h3>Thời gian hoàn thành: <span>${host ? data.time2 : data.time1}s</span></h3>
+                    <h3>Điểm của bạn: <span>${host ? data.score2 : data.score1}</span></h3>
+                    <h6>(Tự động thoát sau 30s)</h6>
+
+                `
+
+                for (let i=0;i<blockDOM.length;i++) {
+                    blockDOM[i].onclick = null
+                    setTimeout(()=>{
+                        blockDOM[i].style.opacity = 0
+                    },60*i)
+                }
+
+                playSfx(src.sfxLose)
+                clearInterval(gameWhile)
+                setTimeout(()=>{
+                    location.reload()
+                },30000)
+        }
+
         time++;
         if (time % 4 == 0) {
             data = await downdate(src,id)
             let scoreOp = (host)?data.score2:data.score1
             scoreBoard[1].innerHTML = "Điểm: <span>" +scoreOp+"</span>";
             let jsonupdate = (host)?{
-                "score1":score
+                "score1":score,
+                "time1":time
             }:{
-                "score2":score
+                "score2":score,
+                "time2":time
             }
             setTimeout(()=>{
                 update(src,id,jsonupdate)
@@ -805,13 +841,33 @@ async function gameStartMulti(src,matrix,id,host) {
                     },500)
                 }
             }
+
+            
+
             if (leftBlock <=0) {
                 document.querySelector("main .mid-side #noitce").style.display = "block"
+                document.querySelector("main .mid-side #noitce").innerHTML = `
+                    <h1>CHIẾN THẮNG!!!</h1>
+                    <h2>Bạn đã hoàn thành trước đối thủ</h2>
+                    <h3>Thời gian hoàn thành: <span>${time}s</span></h3>
+                    <h3>Điểm: <span>${score}</span></h3>
+                    <h6>(Tự động thoát sau 30s)</h6>
+                `
                 playSfx(src.sfxClear)
                 clearInterval(gameWhile)
+                let jsonupdate = (host)?{
+                    "score1":score,
+                    "time1":time,
+                    "end": 1
+                }:{
+                    "score2":score,
+                    "time2":time,
+                    "end": 2
+                }
+                update(src,id,jsonupdate)
                 setTimeout(()=>{
                     location.reload()
-                },5000)
+                },30000)
             }
         }
     }
