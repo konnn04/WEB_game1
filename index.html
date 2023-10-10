@@ -11,7 +11,7 @@
 </head>
 <body>
     <span id="logo">
-        Konnn_v1.0
+        Konnn_v1.1
     </span>
     <div id="musicBtn">
         <i class="fa-solid fa-volume-high"></i>
@@ -58,8 +58,40 @@
             <div class="listAvt">
                 <!--  -->
             </div>
-            <div id="closeSetAvt">
-                <i class="fa-solid fa-circle-xmark"></i>
+        </div>
+        <div class="overplay setRoom">
+            <h2>
+                Tạo phòng:
+            </h2>
+            <div class="form">
+                <label for="mode_room">Chế độ: </label>
+                <select name="mode" id="mode_room">
+                    <option value="false">
+                        Không công khai
+                    </option>
+                    <option value="true">
+                        Công khai
+                    </option>
+                </select>
+                <br>
+                <label for="size_room">Kích thước: </label>
+                <select name="size" id="size_room">
+                    
+                </select>
+                <br>
+                <button id="switchRoom" type="button">Mở phòng</button>
+                <h6 id="id_host">Mã phòng: <span>-</span></h6>
+                <br>
+                
+                <hr>
+                <div style="display: flex;align-items: center;gap: 10px;">
+                    <label for="id_join_room">Tham gia: </label>
+                    <input type="text" id="id_join_room">
+                    <button id="join_room" type="button">OK</button>
+                </div>
+                <div id="closeSetRoom">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
             </div>
         </div>
         <div class="overplay setMatrix">

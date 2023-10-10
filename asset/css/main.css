@@ -28,6 +28,62 @@ body{
     font-size: 1.4rem;
     cursor: pointer;
 }
+/* room */
+
+.setRoom .form{
+    width: 90%;
+    max-width: 400px;
+}
+
+.form label{
+    font-size: 1.2rem;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+.form #switchRoom{
+    display: block;
+    font-size: 1.2rem;
+    width: fit-content;
+    height: fit-content;
+    padding: 10px;
+    aspect-ratio: unset;
+}
+
+.form select{
+    background-color: transparent;
+    font-size: 1.2rem;
+}
+
+.form option{
+    color: #131313;
+}
+
+.form #id_join_room {
+    background-color: transparent;
+    border: 2px solid #fff;
+    font-size: 1.2rem;    
+}
+
+.form #id_host{
+    font-weight: 400;
+    font-size: 1rem;
+    margin: 10px 0;
+}
+
+.form #id_host span{
+    font-size: 1.4rem;
+}
+
+.form #closeSetRoom {
+    display: flex;
+    justify-content: center;
+}
+
+.form #closeSetRoom i {
+    margin: auto;
+}
+
 
 /* sence1 */
 #loading{

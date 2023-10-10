@@ -4,7 +4,6 @@ let avtPos = 0
 let score=0
 let timeleft = 0
 let ratioScore = 1
-
 let seeding = 0
 let z_rand = -1
 
@@ -117,7 +116,12 @@ window.onload = async ()=>{
         }
     ]
     await loadAsset(src,listAsset)
-    
+    //Tạo input
+    let h=""
+    for (let i=2;i<=20;i++) {
+        h+=`<option value="${i}">${i}</option>`
+    }
+    document.querySelector("#size_room").innerHTML = h
 }
 
 function goLobby(src) {  
@@ -193,10 +197,158 @@ function goLobby(src) {
     }
     //MultiplayRoom
     let roomPlay = document.querySelector("#roomPlay")
-    roomPlay.onclick = ()=>{
+    document.querySelector("#closeSetRoom").onclick = ()=>{
         playSfx(src.sfxClick)
-        alert("Đang phát triển!!!")//
+        document.querySelector("#lobby .setRoom").style.display= "none"
     }
+    roomPlay.onclick = async ()=>{
+        playSfx(src.sfxClick)
+        document.querySelector("#lobby .setRoom").style.display= "flex"
+    }
+    let creFlag = false
+    let cdCreRoom = false
+    let idRoomCre = -1;
+    let btnCreRoom = document.querySelector("#switchRoom") 
+    let loop
+    btnCreRoom.onclick = async ()=>{
+        //timeout
+        if (cdCreRoom) return
+        cdCreRoom=true
+        btnCreRoom.style.cursor = "not-allowed"
+        setTimeout(()=>{
+            cdCreRoom=false
+            btnCreRoom.style.cursor = "pointer"
+        },3000)
+        //Lấy dữ liệu
+        let modeRoom = (document.querySelector("#mode_room").value == "true"?true:false)//true = public
+        let bMatrix = parseInt(document.querySelector("#size_room").value)
+        let DOMidRoom = document.querySelector("#id_host")
+        
+
+        if (!creFlag) {
+            creFlag = true
+            btnCreRoom.innerText = "Dừng mở phòng"
+            //Tạo phòng
+            seeding = new Date().getTime()
+            await fetch(src.API, {
+                method: 'POST',
+                headers: {'content-type':'application/json'},
+                // Send your data in the request body as JSON
+                body: JSON.stringify({
+                    "player":[username],
+                    "diff":bMatrix,
+                    "seeding":seeding,
+                    "avt1":"./" + src.emoij[avtPos],
+                    "avt2":"",
+                    "score1":0,
+                    "score2":0,
+                    "time1":0,
+                    "time2":0,
+                    "end":0,
+                    "public":modeRoom
+                })
+              }).then(res => {
+                if (res.ok) {
+                    return res.json();
+                }
+                // handle error
+              }).then(task => {
+                idRoomCre=task.id
+                DOMidRoom.innerHTML = `Mã phòng: <span>${idRoomCre}</span>`
+              }).catch(error => {
+                alert("Lỗi đường truyền")
+              })
+              loop = setInterval(async ()=>{
+                await fetch(src.API+"/"+idRoomCre, {
+                    method: 'GET',
+                    headers: {'content-type':'application/json'},
+                }).then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                    // handle error
+                }).then(async tasks => {
+                    if (tasks.player.length!=1) {
+                        clearInterval(loop)
+                        await startMatchPrepareHost(src,idRoomCre,bMatrix)
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    alert("Lỗi đường truyền")
+                })
+              },2000)
+        }else{
+            creFlag = false
+            btnCreRoom.innerText = "Mở phòng"
+            playSfx(src.sfxClick)
+            clearInterval(loop)
+            //Xóa phòng
+        await fetch(src.API+"/"+idRoomCre, {
+            method: 'DELETE',
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+        // handle error
+        }).then(task => {
+            DOMidRoom.innerHTML = `Mã phòng: <span>---</span>`
+        }).catch(error => {
+            console.log(error)
+            alert("Lỗi đường truyền")
+        })
+        }
+
+    }
+
+    document.querySelector("#join_room").onclick = async ()=>{
+        let idroom = parseInt(document.querySelector("#id_join_room").value)
+        console.log(idroom)
+        await fetch(src.API+"/"+idroom, {
+            method: 'GET',
+            headers: {'content-type':'application/json'},
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+            // handle error
+        }).then( async tasks => {
+            seeding = tasks.seeding
+            if (tasks) {
+                if (tasks.player.length < 2) {
+                    let player = tasks.player
+                    player.push(username)
+                    await fetch(src.API+"/"+idroom, {
+                        method: 'PUT', // or PATCH
+                        headers: {'content-type':'application/json'},
+                        body: JSON.stringify({
+                            "player":player,
+                            "avt2":"./" + src.emoij[avtPos]
+                        })
+                    }).then(res => {
+                        if (res.ok) {
+                            return res.json();
+                        }
+                        // handle error
+                    }).then(task => {
+                        
+                        startMatchPrepareClient(src,idroom,task.diff)
+                        
+                    }).catch(error => {
+                        alert("lỗi")
+                        console.log(error)
+                    })       
+                }else{
+                    alert("Phòng đang thi đấu!")
+                }
+            }else{
+                alert("Phòng không tồn tại")
+            }
+        }).catch(error => {
+            console.log(error)
+            alert("Lỗi đường truyền")
+        })
+    }
+    
     //SetAvt
     let setAvt = document.querySelector("#setAvt")
     let listAvt = document.querySelector(".listAvt")
@@ -466,7 +618,7 @@ async function startMatching(src) {
     var check = false
     if (data.length>0) {
         await data.forEach(async(e,i)=>{
-            if (e.player.length==1) {
+            if (e.player.length==1 && e.public) {
                 check = true 
             idRoom = e.id
             let player = e.player
@@ -484,7 +636,8 @@ async function startMatching(src) {
                 }
                 // handle error
             }).then(task => {
-                startMatchPrepareClient(src,e.id)
+                
+                startMatchPrepareClient(src,e.id,task.diff)
                 time.innerText ="Bắt cặp thành công!"
                 seeding = task.seeding
                 
@@ -509,7 +662,7 @@ async function startMatching(src) {
         // Send your data in the request body as JSON
         body: JSON.stringify({
             "player":[username],
-            "diff":4,
+            "diff":5,
             "seeding":seeding,
             "avt1":"./" + src.emoij[avtPos],
             "avt2":"",
@@ -517,7 +670,8 @@ async function startMatching(src) {
             "score2":0,
             "time1":0,
             "time2":0,
-            "end":0
+            "end":0,
+            "public":true
         })
       }).then(res => {
         if (res.ok) {
@@ -556,7 +710,7 @@ async function startMatching(src) {
                 if (tasks.player.length!=1) {
                     seeding = tasks.seeding
                     clearInterval(run)
-                    await startMatchPrepareHost(src,idRoom)
+                    await startMatchPrepareHost(src,idRoom,5)
                     time.innerText ="Bắt cặp thành công!"
                 }
             }).catch(error => {
@@ -610,27 +764,26 @@ async function startMatching(src) {
 }
 
 // 
-async function startMatchPrepareHost(src,id) {
+async function startMatchPrepareHost(src,id,matrix) {
     playSfx(src.sfxMatched)
     src.bgMatching.pause()
-    
     setTimeout(async()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,5,id,true)
+        await gameStartMulti(src,matrix,id,true)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
 }
 
-async function startMatchPrepareClient(src,id) {
+async function startMatchPrepareClient(src,id,matrix) {
     playSfx(src.sfxMatched)    
     src.bgMatching.pause()    
 
     setTimeout(async ()=>{
         document.querySelector("#lobby").style.display = "none"
         document.querySelector("main").style.display = "grid"
-        await gameStartMulti(src,5,id,false)
+        await gameStartMulti(src,matrix,id,false)
         playRepeat(src.bgPlay,0,.2)
 
     },3000)
@@ -719,6 +872,7 @@ async function gameStartMulti(src,matrix,id,host) {
         result.push(false)
     }
     let guild = (matrix % 2 ==0 && matrix>5)?Math.floor(matrix/2 - 2):0;
+
     let num = Math.floor(block/2) - guild
         for (let i=0;i<num;i++) {
             let rad 
