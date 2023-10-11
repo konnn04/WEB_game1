@@ -13,6 +13,10 @@ if (localStorage.getItem("avt_game0")) {
     avtPos = 0
 }
 
+//Gameloop
+
+
+
 function updateProgressLoanding(i) {
     let num = document.querySelector("#loading .loading-box .i")
     let bar = document.querySelector("#loading .loading-box .progress-bar div")
@@ -69,6 +73,10 @@ window.onload = async ()=>{
         {
             "name":"bgMain",
             "src":"./asset/audio/BGM_MULTI_LIVE.mp3",
+            "type":"AUDIO"
+        },{
+            "name":"bgEnding",
+            "src":"./asset/audio/BGM_LIVE_RESULT.mp3",
             "type":"AUDIO"
         },
         {
@@ -144,6 +152,7 @@ function goLobby(src) {
             src.bgMain.volume = 0
             src.bgPlay.volume = 0
             src.bgMatching.volume = 0
+            src.bgEnding.volume = 0
             localStorage.setItem("music_game1","off")
         }else{
             musicBtn.style.opacity = 1
@@ -151,12 +160,14 @@ function goLobby(src) {
             src.bgMain.volume = .4
             src.bgMatching.volume = .4
             src.bgPlay.volume = .2
+            src.bgEnding.volume = .4
             localStorage.setItem("music_game1","on")
         }
     }  
     setTimeout(()=>{
         if (localStorage.getItem("music_game1")=="off") musicBtn.onclick()
         playRepeat(src.bgMain,0,.4)
+        
         // playRepeat(src.music1,0)
         document.querySelector("#loading").style.display = "none"
         document.querySelector("#lobby").style.display = "flex"
@@ -254,8 +265,11 @@ function goLobby(src) {
                     "score2":0,
                     "time1":0,
                     "time2":0,
-                    "end":0,
-                    "public":modeRoom
+                    "end1":false,
+                    "end2":false,
+                    "public":modeRoom,
+                    "realtime1":new Date().getTime(),
+                    "realtime2":new Date().getTime()
                 })
               }).then(res => {
                 if (res.ok) {
@@ -280,7 +294,7 @@ function goLobby(src) {
                 }).then(async tasks => {
                     if (tasks.player.length!=1) {
                         clearInterval(loop)
-                        await startMatchPrepareHost(src,idRoomCre,bMatrix)
+                        await startMatchPrepareHost(src,idRoomCre,bMatrix,tasks)
                     }
                 }).catch(error => {
                     console.log(error)
@@ -341,7 +355,7 @@ function goLobby(src) {
                         // handle error
                     }).then(task => {
                         
-                        startMatchPrepareClient(src,idroom,task.diff)
+                        startMatchPrepareClient(src,idroom,task.diff,task)
                         
                     }).catch(error => {
                         alert("lỗi")
@@ -467,12 +481,13 @@ function gameStartSingle(src,matrix) {
         check[rad]=temp
         block--
         //tăng i
-        if ((i!=0) && (i % duoPic == 0)) {
+        if (i==0 || (i % duoPic == 0)) {
             indexPic++;
         }
     }
 
     let leftBlock = num + block
+    let leftHiddenBlock = num
     while (block>0) {
         anwser[check[0]] = -99
         let temp = check[block-1]
@@ -579,6 +594,7 @@ function gameStartSingle(src,matrix) {
                     score += time1*100 + ((matrix*matrix/2)-leftBlock)*10
                     scoreBoard.innerText = "Điểm: " +score
                     leftBlock--;
+                    leftHiddenBlock--;
                     setTimeout(()=>{
                         blockDOM[k].style.opacity = "0"
                         blockDOM[i].style.opacity = "0"
@@ -604,7 +620,7 @@ function gameStartSingle(src,matrix) {
                     },500)
                 }
             }
-            if (leftBlock <=0) {
+            if (leftBlock <=0 || leftHiddenBlock <=0) {
                 document.querySelector("main .mid-side #noitce").style.display = "block"
                 playSfx(src.sfxClear)
                 clearInterval(runTime)
@@ -666,7 +682,7 @@ async function startMatching(src) {
                 // handle error
             }).then(task => {
                 
-                startMatchPrepareClient(src,e.id,task.diff)
+                startMatchPrepareClient(src,e.id,task.diff,task)
                 time.innerText ="Bắt cặp thành công!"
                 seeding = task.seeding
                 
@@ -698,8 +714,11 @@ async function startMatching(src) {
             "score2":0,
             "time1":0,
             "time2":0,
-            "end":0,
-            "public":true
+            "end1":false,
+            "end2":false,
+            "public":true,
+            "realtime1":new Date().getTime(),
+            "realtime2":new Date().getTime(),
         })
       }).then(res => {
         if (res.ok) {
@@ -710,6 +729,7 @@ async function startMatching(src) {
         idRoom=task.id
         console.log("Mã phòng: " + idRoom)
       }).catch(error => {
+        cancelMatching.onclick()
         alert("Lỗi đường truyền")
       })
 
@@ -738,12 +758,15 @@ async function startMatching(src) {
                 if (tasks.player.length!=1) {
                     seeding = tasks.seeding
                     clearInterval(run)
-                    await startMatchPrepareHost(src,idRoom,5)
+                    await startMatchPrepareHost(src,idRoom,5,tasks)
                     time.innerText ="Bắt cặp thành công!"
                 }
             }).catch(error => {
                 console.log(error)
+                clearInterval(run)
                 alert("Lỗi đường truyền")
+                cancelMatching.onclick()
+
             })
         }
 
@@ -762,7 +785,10 @@ async function startMatching(src) {
             // Do something with deleted task
             }).catch(error => {
                 console.log(error)
+                clearInterval(run)
                 alert("Lỗi đường truyền")
+                cancelMatching.onclick()
+
             })
         }
     },1000)
@@ -792,8 +818,8 @@ async function startMatching(src) {
 }
 
 // 
-async function startMatchPrepareHost(src,id,matrix) {
-    playSfx(src.sfxMatched)
+async function startMatchPrepareHost(src,id,matrix,data) {
+    matchFound(src,data,true)
     src.bgMatching.pause()
     src.bgMain.pause()
     setTimeout(async()=>{
@@ -805,8 +831,8 @@ async function startMatchPrepareHost(src,id,matrix) {
     },3000)
 }
 
-async function startMatchPrepareClient(src,id,matrix) {
-    playSfx(src.sfxMatched)    
+async function startMatchPrepareClient(src,id,matrix,data) {
+    matchFound(src,data,false)
     src.bgMatching.pause()    
     src.bgMain.pause()
 
@@ -829,46 +855,169 @@ function ramdonSeft() {
 }
 
 // 
+
+
+
 async function gameStartMulti(src,matrix,id,host) {
     let timeBarLeft = document.querySelector(".timeBarLeft")
     timeBarLeft.style.display = "none"
     let data = await downdate(src,id)
     let scoreBoard = document.querySelectorAll(".scoreBoard")
     let time = 0
-    
+    let uTime = 0
+    let onPlay =true
+    let waitResult = false
     //Tạo bộ đếm
-    let gameWhile = setInterval(async ()=>{ 
-        
-        let idOP = (host)?2:1;
-        let delayTime = 0
-        if (host) {
-            delayTime = Math.abs(new Date().getTime() - data.realtime2) 
-        }else{
-            delayTime = Math.abs(new Date().getTime() - data.realtime1) 
-        }
-        delayTime = (delayTime == NaN)?0:delayTime;
-        console.log(delayTime)
-        if (delayTime > 12000) {
-            document.querySelector(".right-side .avt_op img").style.filter = "brightness(.2)"
-            // document.querySelector(".right-side .avt_op").innerText = "Đã ngắt mạng"
-        }else{
-            document.querySelector(".right-side .avt_op img").style.filter = "brightness(1)"
-            // document.querySelector(".right-side .avt_op").innerText = ""
-        }
-        if (data.end == idOP) {
+    let gameWhile
+    setTimeout(()=>{
+        gameWhile = setInterval(async ()=>{ 
+            time++;
+            if (onPlay) uTime++;
+
+            if (time % 40 == 0 && time > 0) {
+                data = await downdate(src,id)
+                let scoreOp = (host)?data.score2:data.score1
+                scoreBoard[1].innerHTML = "Điểm: <span>" +scoreOp+"</span>";
+                let jsonupdate = (host)?{
+                    "score1":score,
+                    "time1":uTime,
+                    "realtime1":new Date().getTime()
+                }:{
+                    "score2":score,
+                    "time2":uTime,
+                    "realtime2":new Date().getTime()
+                }
+                setTimeout(()=>{
+                    if (onPlay) update(src,id,jsonupdate)
+               },2000)
+            }
+            let delayTime = 0
+            if (host) {
+                delayTime = Math.abs(new Date().getTime() - (data.realtime2 || new Date().getTime())) 
+            }else{
+                delayTime = Math.abs(new Date().getTime() - (data.realtime1 || new Date().getTime())) 
+            }
+            delayTime = (delayTime == NaN)?0:delayTime;
+            if (delayTime > 12000) {
+                document.querySelector(".right-side .avt_op img").style.filter = "brightness(.2)"
+                // document.querySelector(".right-side .avt_op").innerText = "Đã ngắt mạng"
+            }else{
+                document.querySelector(".right-side .avt_op img").style.filter = "brightness(1)"
+                // document.querySelector(".right-side .avt_op").innerText = ""
+            }
+                    
+            
+            if (onPlay) document.querySelector(".timeRemain").innerHTML = "Thời gian: <span>"+(uTime/10).toFixed(1)+"</span>"
+            if (waitResult) {
+                if ((host && data.end2==true) || (!host && data.end1==true)) {
+                    if ((host && data.time2>uTime) || (!host && data.time1>uTime)) {
+                        setTimeout(()=>{
+                            location.reload()
+                        },30000)
+                        clearInterval(gameWhile)
+                        playRepeat(src.bgEnding,0,.4)
+                        document.querySelector("main .mid-side #noitce").innerHTML = `
+                        <h1>BẠN THẮNG</h1>
+                        <h2>Bạn đã chiến thắng đối thủ!</h2>
+                        <h3>Thời gian của bạn: <span>${(uTime/10).toFixed(1)}s</span></h3>
+                        <h3>Điểm của bạn: <span>${score}</span></h3>
+                        <hr>
+                        <h4>Đối thủ: </h4>
+                        <h3>Thời gian hoàn thành: <span>${((host ? data.time2 : data.time1)/10).toFixed(1)}s</span></h3>
+                        <h3>Điểm của đối thủ: <span>${host ? data.score2 : data.score1}</span></h3>
+                        <h6>(Tự động thoát sau 30s)</h6>
+                `
+                    }
+                    if ((host && data.time2 == uTime) || (!host && data.time1 == uTime)) {
+                        if ((host && data.score2 < score ) || (!host && data.score1 < score)) {
+                            clearInterval(gameWhile)
+                            playRepeat(src.bgEnding,0,.4)
+                            setTimeout(()=>{
+                                location.reload()
+                            },30000)
+                            document.querySelector("main .mid-side #noitce").innerHTML = `
+                            <h1>BẠN THẮNG</h1>
+                            <h2>Bạn dành nhiều điểm hơn đối thủ</h2>
+                            <h3>Thời gian của bạn và đối thủ: <span>${(uTime/10).toFixed(1)}s</span></h3>
+                            <h3>Điểm của bạn: <span>${score}</span></h3>
+                            <hr>
+                            <h4>Đối thủ: </h4>
+                            <h3>Điểm của đối thủ: <span>${host ? data.score2 : data.score1}</span></h3>
+                            <h6>(Tự động thoát sau 30s)</h6>
+                `
+                        }else{
+                            clearInterval(gameWhile)
+                            playRepeat(src.bgEnding,0,.4)
+                            setTimeout(()=>{
+                                location.reload()
+                            },30000)
+                            document.querySelector("main .mid-side #noitce").innerHTML = `
+                            <h1>BẠN THUA</h1>
+                            <h2>Bạn dành ít điểm hơn đối thủ</h2>
+                            <h3>Thời gian của bạn và đối thủ: <span>${(uTime/10).toFixed(1)}s</span></h3>
+                            <h3>Điểm của bạn: <span>${score}</span></h3>
+                            <hr>
+                            <h4>Đối thủ: </h4>
+                            <h3>Điểm của đối thủ: <span>${host ? data.score2 : data.score1}</span></h3>
+                            <h6>(Tự động thoát sau 30s)</h6>
+                `
+                        }
+                    }
+                    if ((host && data.time2 < uTime) || (!host && data.time1 < uTime)){
+                        clearInterval(gameWhile)
+                        playRepeat(src.bgEnding,0,.4)
+                        setTimeout(()=>{
+                            location.reload()
+                        },30000)
+                        document.querySelector("main .mid-side #noitce").innerHTML = `
+                        <h1>BẠN THUA</h1>
+                        <h2>Thời gian bạn chậm hơn so với đối thủ!</h2>
+                        <h3>Thời gian của bạn: <span>${(uTime/10).toFixed(1)}s</span></h3>
+                        <h3>Điểm của bạn: <span>${score}</span></h3>
+                        <hr>
+                        <h4>Đối thủ: </h4>
+                        <h3>Thời gian hoàn thành: <span>${((host ? data.time2 : data.time1)/10).toFixed(1)}s</span></h3>
+                        <h3>Điểm của đối thủ: <span>${host ? data.score2 : data.score1}</span></h3>
+                        <h6>(Tự động thoát sau 30s)</h6>
+                `
+                    }
+                }else{
+                    if ((host && data.time2 > uTime) || (!host && data.time1 > uTime)) {
+                        clearInterval(gameWhile)
+                        playRepeat(src.bgEnding,0,.4)
+                        setTimeout(()=>{
+                            location.reload()
+                        },30000)
+                        document.querySelector("main .mid-side #noitce").innerHTML = `
+                            <h1>BẠN THẮNG</h1>
+                            <h2>Bạn đã chiến thắng đối thủ!</h2>
+                            <h3>Thời gian của bạn: <span>${(uTime/10).toFixed(1)}s</span></h3>
+                            <h3>Điểm của bạn: <span>${score}</span></h3>
+                            <hr>
+                            <h4>Đối thủ: </h4>
+                            <h3>Chưa hoàn thành xong</span></h3>
+                            <h6>(Tự động thoát sau 30s)</h6>
+                    `
+                    }
+                }
+            }
+
+
+            if (!waitResult && ((host && data.end2==true && uTime > data.time2) || (!host && data.end1==true && uTime > data.time1))) {
+                src.bgPlay.pause()
+                src.sfxLose.play()
                 document.querySelector("main .mid-side #noitce").style.display = "block"
                 document.querySelector("main .mid-side #noitce").innerHTML = `
                     <h1>THUA CUỘC!!!</h1>
                     <h2>Đối thủ đã hoàn thành trước bạn!</h2>
-                    <h3>Thời gian của bạn: <span>${time}s</span></h3>
+                    <h3>Thời gian của bạn: <span>${(uTime/10).toFixed(1)}s</span></h3>
                     <h3>Điểm của bạn: <span>${score}</span></h3>
                     <hr>
                     <h4>Đối thủ: </h4>
-                    <h3>Thời gian hoàn thành: <span>${host ? data.time2 : data.time1}s</span></h3>
+                    <h3>Thời gian hoàn thành: <span>${((host ? data.time2 : data.time1)/10).toFixed(1)}s</span></h3>
                     <h3>Điểm của bạn: <span>${host ? data.score2 : data.score1}</span></h3>
                     <h6>(Tự động thoát sau 30s)</h6>
-
-                `
+                `                                         
 
                 for (let i=0;i<blockDOM.length;i++) {
                     blockDOM[i].onclick = null
@@ -882,28 +1031,11 @@ async function gameStartMulti(src,matrix,id,host) {
                 setTimeout(()=>{
                     location.reload()
                 },30000)
-        }
-
-        time++;
-        if (time % 4 == 0) {
-            data = await downdate(src,id)
-            let scoreOp = (host)?data.score2:data.score1
-            scoreBoard[1].innerHTML = "Điểm: <span>" +scoreOp+"</span>";
-            let jsonupdate = (host)?{
-                "score1":score,
-                "time1":time,
-                "realtime1":new Date().getTime()
-            }:{
-                "score2":score,
-                "time2":time,
-                "realtime2":new Date().getTime()
             }
-            setTimeout(()=>{
-                update(src,id,jsonupdate)
-            },2000)
-        }
-        document.querySelector(".timeRemain").innerHTML = "Thời gian: <span>"+time+"</span>"
+        },100)
     },1000)
+    
+    
     
     document.querySelector(".left-side .avt img").src = "./asset/emojis/"+src.emoij[avtPos]
     let avtOp = (host)?data.avt2:data.avt1;
@@ -942,11 +1074,12 @@ async function gameStartMulti(src,matrix,id,host) {
         check[rad]=temp
         block--
         //tăng i
-        if ((i!=0) && (i % duoPic == 0)) {
+        if ((i==0) || (i % duoPic == 0)) {
             indexPic++;
         }
     }
     let leftBlock = num + block
+    let leftHiddenBlock = num
     while (block>0) {
         anwser[check[0]] = -99
         let temp = check[block-1]
@@ -1030,6 +1163,7 @@ async function gameStartMulti(src,matrix,id,host) {
                     score += (leftBlock*10 + 1000)*ratioScore
                     scoreBoard[0].innerHTML = "Điểm: <span>" +score+"</span>"
                     leftBlock--;
+                    leftHiddenBlock--;
                     setTimeout(()=>{
                         blockDOM[k].style.opacity = "0"
                         blockDOM[i].style.opacity = "0"
@@ -1058,30 +1192,26 @@ async function gameStartMulti(src,matrix,id,host) {
 
             
 
-            if (leftBlock <=0) {
+            if (leftBlock <=0 || leftHiddenBlock <=0) {
+                //
+                src.bgPlay.pause()
                 document.querySelector("main .mid-side #noitce").style.display = "block"
-                document.querySelector("main .mid-side #noitce").innerHTML = `
-                    <h1>CHIẾN THẮNG!!!</h1>
-                    <h2>Bạn đã hoàn thành trước đối thủ</h2>
-                    <h3>Thời gian hoàn thành: <span>${time}s</span></h3>
-                    <h3>Điểm: <span>${score}</span></h3>
-                    <h6>(Tự động thoát sau 30s)</h6>
-                `
+                document.querySelector("main .mid-side #noitce").innerHTML = `<h1>CLEAR!</h1><h6>Chờ tổng kết kết quả...</h6>`
+                waitResult = true
+
                 playSfx(src.sfxClear)
-                clearInterval(gameWhile)
                 let jsonupdate = (host)?{
                     "score1":score,
                     "time1":time,
-                    "end": 1
+                    "end1": true
                 }:{
                     "score2":score,
                     "time2":time,
-                    "end": 2
+                    "end2": true
                 }
-                update(src,id,jsonupdate)
-                setTimeout(()=>{
-                    location.reload()
-                },30000)
+                if (onPlay) update(src,id,jsonupdate)
+                onPlay=false
+                
             }
         }
     }
@@ -1144,4 +1274,20 @@ function runBuff() {
             clearInterval(buff)
         }
     },1000)
+}
+
+function matchFound(src,data,host) {
+    if (host) {
+        document.querySelector("#match-found .img1 img").src = "./asset/emojis/"+src.emoij[avtPos]
+        document.querySelector("#match-found .img2 img").src = "./asset/emojis/"+data.avt2
+    }else{
+        document.querySelector("#match-found .img1 img").src = "./asset/emojis/"+src.emoij[avtPos]
+        document.querySelector("#match-found .img2 img").src = "./asset/emojis/"+data.avt1
+    }
+    src.sfxMatched.play()
+    let ov = document.querySelector("#match-found")
+    ov.classList.add("found")
+    setTimeout(()=>{
+        ov.classList.remove("found")
+    },3000)
 }
