@@ -467,14 +467,14 @@ function gameStartSingle(src,matrix) {
     for (let i=0;i<num;i++) {
         let rad 
         //cặp 1
-        rad= Math.floor(Math.ramdom()*block)
+        rad= Math.floor(Math.random()*block)
         anwser[check[rad]] = indexPic
         let temp = check[block-1]
         check[block-1] = check[rad]
         check[rad]=temp
         block--
         //cặp 2
-        rad= Math.floor(Math.ramdom()*block)
+        rad= Math.floor(Math.random()*block)
         anwser[check[rad]] = indexPic
         temp = check[block-1]
         check[block-1] = check[rad]
