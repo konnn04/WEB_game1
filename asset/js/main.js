@@ -280,7 +280,12 @@ function goLobby(src) {
                 idRoomCre=task.id
                 DOMidRoom.innerHTML = `Mã phòng: <span>${idRoomCre}</span>`
               }).catch(error => {
-                alert("Lỗi đường truyền")
+                    let obj = {
+                        "title":"Lỗi kết nối!",
+                        "detail":"Vui lòng kiểm tra đường truyền!",
+                        "type":"wrong"
+                    }
+                    createNotification(obj,5000)
               })
               loop = setInterval(async ()=>{
                 await fetch(src.API+"/"+idRoomCre, {
@@ -298,7 +303,12 @@ function goLobby(src) {
                     }
                 }).catch(error => {
                     console.log(error)
-                    alert("Lỗi đường truyền")
+                    let obj = {
+                        "title":"Lỗi kết nối!",
+                        "detail":"Vui lòng kiểm tra đường truyền!",
+                        "type":"wrong"
+                    }
+                    createNotification(obj,5000)
                 })
               },2000)
         }else{
@@ -318,7 +328,12 @@ function goLobby(src) {
             DOMidRoom.innerHTML = `Mã phòng: <span>---</span>`
         }).catch(error => {
             console.log(error)
-            alert("Lỗi đường truyền")
+            let obj = {
+                "title":"Lỗi kết nối!",
+                "detail":"Vui lòng kiểm tra đường truyền! (Lỗi xóa phòng)",
+                "type":"wrong"
+            }
+            createNotification(obj,5000)
         })
         }
 
@@ -358,18 +373,37 @@ function goLobby(src) {
                         startMatchPrepareClient(src,idroom,task.diff,task)
                         
                     }).catch(error => {
-                        alert("lỗi")
+                        let obj = {
+                            "title":"Lỗi kết nối!",
+                            "detail":"Vui lòng kiểm tra đường truyền!",
+                            "type":"wrong"
+                        }
+                        createNotification(obj,5000)
                         console.log(error)
                     })       
                 }else{
-                    alert("Phòng đang thi đấu!")
+                    let obj = {
+                        "title":"Phòng đang thi đấu!",
+                        "detail":"",
+                        "type":"warning"
+                    }
+                    createNotification(obj,5000)
                 }
             }else{
-                alert("Phòng không tồn tại")
+                let obj = {
+                    "title":"Phòng không tồn tại",
+                    "detail":"Mã phòng vừa nhập không đúng!",
+                    "type":"wrong"
+                }
+                createNotification(obj,5000)
             }
         }).catch(error => {
-            console.log(error)
-            alert("Lỗi đường truyền")
+            let obj = {
+                "title":"Lỗi kết nối!",
+                "detail":"Vui lòng kiểm tra đường truyền!",
+                "type":"wrong"
+            }
+            createNotification(obj,5000)
         })
     }
     
@@ -391,6 +425,12 @@ function goLobby(src) {
             playSfx(src.sfxClick)
             avtPos = i
             localStorage.setItem("avt_game0",i)
+            let obj = {
+                "title":"Đổi avatar thành công!",
+                "detail":"Avatar của bạn đã được thay đổi!",
+                "type":"right"
+            }
+            createNotification(obj,5000)
             document.querySelector(".setAvtBox").style.display = "none"
         }
     }
@@ -656,8 +696,12 @@ async function startMatching(src) {
     }).then(tasks => {
         data = tasks
     }).catch(error => {
-        console.log(error)
-        alert("Lỗi đường truyền")
+        let obj = {
+            "title":"Lỗi kết nối!",
+            "detail":"Vui lòng kiểm tra đường truyền!",
+            "type":"wrong"
+        }
+        createNotification(obj,5000)
     })
     //Tìm phòng
     var check = false
@@ -687,8 +731,12 @@ async function startMatching(src) {
                 seeding = task.seeding
                 
             }).catch(error => {
-                alert("lỗi")
-                console.log(error)
+                let obj = {
+                    "title":"Lỗi kết nối!",
+                    "detail":"Vui lòng kiểm tra đường truyền!",
+                    "type":"wrong"
+                }
+                createNotification(obj,5000)
             })         
             }
         })
@@ -730,7 +778,12 @@ async function startMatching(src) {
         console.log("Mã phòng: " + idRoom)
       }).catch(error => {
         cancelMatching.onclick()
-        alert("Lỗi đường truyền")
+        let obj = {
+            "title":"Lỗi kết nối!",
+            "detail":"Vui lòng kiểm tra đường truyền!",
+            "type":"wrong"
+        }
+        createNotification(obj,5000)
       })
 
 
@@ -764,7 +817,12 @@ async function startMatching(src) {
             }).catch(error => {
                 console.log(error)
                 clearInterval(run)
-                alert("Lỗi đường truyền")
+                let obj = {
+                    "title":"Lỗi kết nối!",
+                    "detail":"Vui lòng kiểm tra đường truyền!",
+                    "type":"wrong"
+                }
+                createNotification(obj,5000)
                 cancelMatching.onclick()
 
             })
@@ -786,7 +844,12 @@ async function startMatching(src) {
             }).catch(error => {
                 console.log(error)
                 clearInterval(run)
-                alert("Lỗi đường truyền")
+                let obj = {
+                    "title":"Lỗi kết nối!",
+                    "detail":"Vui lòng kiểm tra đường truyền!",
+                    "type":"wrong"
+                }
+                createNotification(obj,5000)
                 cancelMatching.onclick()
 
             })
@@ -812,7 +875,12 @@ async function startMatching(src) {
         // Do something with deleted task
         }).catch(error => {
             console.log(error)
-            alert("Lỗi đường truyền")
+            let obj = {
+                "title":"Lỗi kết nối!",
+                "detail":"Vui lòng kiểm tra đường truyền!",
+                "type":"wrong"
+            }
+            createNotification(obj,5000)
         })
     }
 }
@@ -1231,8 +1299,12 @@ async function update(src,id,json) {
     }).then(task => {
         idRoom=task.id
     }).catch(error => {
-        console.log(error)
-        alert("Lỗi đường truyền")
+        let obj = {
+            "title":"Kết nối kém!",
+            "detail":"Có gói tin vừa bị hỏng...",
+            "type":"warning"
+        }
+        createNotification(obj,3000)
     })
 }
 
@@ -1250,8 +1322,12 @@ async function downdate(src,id) {
     }).then(tasks => {
         data = tasks
     }).catch(error => {
-        console.log(error)
-        alert("Lỗi đường truyền")
+        let obj = {
+            "title":"Kết nối kém!",
+            "detail":"Có gói tin vừa bị hỏng...",
+            "type":"warning"
+        }
+        createNotification(obj,3000)
     })
     return data
 }
